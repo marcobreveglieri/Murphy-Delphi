@@ -31,9 +31,8 @@ type
   /// <summary>
   ///  Represents the interface of the "Retry" policy pattern.
   /// </summary>
-  IRetryPolicy = interface(IPolicy)
+  IRetryPolicy = interface(IExecutablePolicy)
     ['{7F6C8429-D08C-4ADF-82F6-FD96747CCA4C}']
-    procedure Execute(AProc: TProc);
     function Retry(ATimes: Integer = 1): IRetryPolicy;
     function RetryForever: IRetryPolicy;
     function RetryOnce: IRetryPolicy;
