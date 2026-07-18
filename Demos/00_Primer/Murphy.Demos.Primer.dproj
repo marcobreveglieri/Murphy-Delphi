@@ -191,6 +191,10 @@
         <DCCReference Include="Samples.Fallback.pas"/>
         <DCCReference Include="Samples.RateLimit.pas"/>
         <DCCReference Include="Samples.Timeout.pas"/>
+        <DCCReference Include="Samples.Bulkhead.pas"/>
+        <DCCReference Include="Samples.Cache.pas"/>
+        <DCCReference Include="Samples.Hedging.pas"/>
+        <DCCReference Include="Samples.PolicyWrap.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
