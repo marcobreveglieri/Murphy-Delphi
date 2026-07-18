@@ -30,16 +30,20 @@ implementation
 
 uses
   System.SysUtils,
+  Murphy.Globals,
   Murphy.Policy.Retry;
 
 { TRetryTests }
 
 procedure TRetryTests.Setup;
 begin
+  // Skips the real wait delays between retry attempts.
+  MurphyTestModeEnabled := True;
 end;
 
 procedure TRetryTests.TearDown;
 begin
+  MurphyTestModeEnabled := False;
 end;
 
 procedure TRetryTests.TestRetryHandle;

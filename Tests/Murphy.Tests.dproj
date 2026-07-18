@@ -159,7 +159,9 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
+        <DCCReference Include="Murphy.Tests.CircuitBreaker.pas"/>
         <DCCReference Include="Murphy.Tests.Fallback.pas"/>
+        <DCCReference Include="Murphy.Tests.RateLimit.pas"/>
         <DCCReference Include="Murphy.Tests.Retry.pas"/>
         <DCCReference Include="Murphy.Tests.Timeout.pas"/>
         <BuildConfiguration Include="Base">

@@ -13,7 +13,9 @@ uses
   DUnitX.Loggers.Console,
   {$ENDIF }
   DUnitX.TestFramework,
+  Murphy.Tests.CircuitBreaker in 'Murphy.Tests.CircuitBreaker.pas',
   Murphy.Tests.Fallback in 'Murphy.Tests.Fallback.pas',
+  Murphy.Tests.RateLimit in 'Murphy.Tests.RateLimit.pas',
   Murphy.Tests.Retry in 'Murphy.Tests.Retry.pas',
   Murphy.Tests.Timeout in 'Murphy.Tests.Timeout.pas';
 

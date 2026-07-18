@@ -59,6 +59,11 @@ type
   /// </summary>
   TRateLimitBuilder = class sealed (TPolicyBuilder<IRateLimitPolicy>)
   public
+    /// <summary>
+    ///  Creates a "Rate Limit" policy instance. Note that the exception
+    ///  types passed here are currently not used by this policy: calls
+    ///  are throttled regardless of any exception filter.
+    /// </summary>
     class function Handle(AExceptionTypes: TArray<ExceptClass>): IRateLimitPolicy; override;
   end;
 
@@ -89,22 +94,27 @@ end;
 
 procedure TRateLimitPolicy.Execute(AProc: TProc);
 begin
-  if IsBucketExpired then
-  begin
-    FBucketIds.Clear;
-    for var LBucketIndex := 1 to FAllowedCalls do
-      FBucketIds.Push(TGUID.NewGuid);
-    FBucketTime := Scheduler.Now;
+  TMonitor.Enter(Self);
+  try
+    if IsBucketExpired then
+    begin
+      FBucketIds.Clear;
+      for var LBucketIndex := 1 to FAllowedCalls do
+        FBucketIds.Push(TGUID.NewGuid);
+      FBucketTime := Scheduler.Now;
+    end;
+    if FBucketIds.Count <= 0 then
+      raise ERateLimitRejectedException.Create(StrErrRateLimitExceeded);
+    FBucketIds.Pop;
+  finally
+    TMonitor.Exit(Self);
   end;
-  if FBucketIds.Count <= 0 then
-    raise ERateLimitRejectedException.Create(StrErrRateLimitExceeded);
-  var LBucketId := FBucketIds.Pop;
   AProc;
 end;
 
 function TRateLimitPolicy.IsBucketExpired: Boolean;
 begin
-  Result := (FBucketTime + FWithinDuration) < Now;
+  Result := (FBucketTime + FWithinDuration) < Scheduler.Now;
 end;
 
 function TRateLimitPolicy.Allow(ACalls: Integer): IRateLimitPolicy;
