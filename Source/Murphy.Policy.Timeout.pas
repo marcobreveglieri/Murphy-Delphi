@@ -68,13 +68,20 @@ type
   /// </summary>
   TTimeoutBuilder = class sealed (TPolicyBuilder<ITimeoutPolicy>)
   public
+    /// <summary>
+    ///  Creates a "Timeout" policy instance. Note that the exception
+    ///  types passed here are currently not used by this policy: any
+    ///  exception raised by the operation is re-raised as it is, and
+    ///  the timeout applies regardless of any exception filter.
+    /// </summary>
     class function Handle(AExceptionTypes: TArray<ExceptClass>): ITimeoutPolicy; override;
   end;
 
 implementation
 
 uses
-  Murphy.Services.Schedulers,
+  System.Diagnostics,
+  System.SyncObjs,
   Murphy.Resources.Strings;
 
 { TTimeoutPolicy }
@@ -86,75 +93,62 @@ begin
 end;
 
 procedure TTimeoutPolicy.Execute(AProc: TProc);
+const
+  TaskRunning = 0;
+  TaskAbandoned = 1;
+  TaskFaulted = 2;
 begin
-  var LStartTime := Scheduler.Now;
+  var LStopwatch := TStopwatch.StartNew;
   var LExceptionObj: TObject := nil;
-  var LTaskCompleted := False;
+  var LTaskState: Integer := TaskRunning;
   var LTask := TTask.Create(
     procedure
     begin
       try
         AProc;
-        LTaskCompleted := True;
       except
-        on E: Exception do
-        begin
-          // Acquire the exception object (takes ownership)
-          LExceptionObj := AcquireExceptionObject;
-          // Don't re-raise - let the task complete normally
-        end;
+        // Acquire the exception object (takes ownership) so it can be
+        // re-raised on the calling thread. When the call has already
+        // timed out nobody is listening anymore, so the exception must
+        // be destroyed here to avoid leaking it.
+        LExceptionObj := AcquireExceptionObject;
+        if TInterlocked.CompareExchange(LTaskState, TaskFaulted, TaskRunning) <> TaskRunning then
+          FreeAndNil(LExceptionObj);
       end;
     end);
-  try
-    LTask.Start;
+  LTask.Start;
 
-    // Poll task completion with timeout monitoring
-    var LPollInterval := TTimeSpan.FromMilliseconds(100);
-    while LTask.Status <> TTaskStatus.Completed do
+  if not LTask.Wait(FTimeoutDuration) then
+  begin
+    // The task is abandoned: from now on it cleans up after itself.
+    // If it already stored an exception, ownership is back here.
+    if TInterlocked.CompareExchange(LTaskState, TaskAbandoned, TaskRunning) = TaskFaulted then
+      FreeAndNil(LExceptionObj);
+
+    // Execute timeout callback if assigned
+    if Assigned(FOnTimeoutCallback) then
     begin
-      // Calculate elapsed time and convert to TTimeSpan
-      var LElapsedDays := Scheduler.Now - LStartTime;
-      var LElapsedTime := TTimeSpan.FromDays(LElapsedDays);
-
-      // Check if timeout has been exceeded
-      if LElapsedTime.TotalMilliseconds > FTimeoutDuration.TotalMilliseconds then
-      begin
-        // Execute timeout callback if assigned
-        if Assigned(FOnTimeoutCallback) then
-        begin
-          var LContext := TTimeoutContext.Create;
-          try
-            LContext.FElapsedTime := LElapsedTime;
-            LContext.FTimeoutDuration := FTimeoutDuration;
-            FOnTimeoutCallback(LContext);
-          finally
-            LContext.Free;
-          end;
-        end;
-
-        // Free the exception object if captured (we're not re-raising it)
-        if Assigned(LExceptionObj) then
-          LExceptionObj.Free;
-
-        // Raise timeout exception
-        raise ETimeoutRejectedException.Create(StrErrTimeoutExceeded);
+      var LContext := TTimeoutContext.Create;
+      try
+        LContext.FElapsedTime := LStopwatch.Elapsed;
+        LContext.FTimeoutDuration := FTimeoutDuration;
+        FOnTimeoutCallback(LContext);
+      finally
+        LContext.Free;
       end;
-
-      // Wait before next poll
-      Scheduler.WaitFor(LPollInterval);
     end;
 
-    // Task completed - check if there was an exception
-    if Assigned(LExceptionObj) then
-    begin
-      // Re-raise the task exception
-      // Note: Handle() filtering is not applied to timeout monitoring itself,
-      // only to exceptions that emerge from the operation
-      raise LExceptionObj;
-    end;
+    // Raise timeout exception
+    raise ETimeoutRejectedException.Create(StrErrTimeoutExceeded);
+  end;
 
-  finally
-    // Task cleanup is handled automatically by reference counting
+  // Task completed within the timeout - check if there was an exception
+  if Assigned(LExceptionObj) then
+  begin
+    // Re-raise the task exception
+    // Note: Handle() filtering is not applied to timeout monitoring itself,
+    // only to exceptions that emerge from the operation
+    raise LExceptionObj;
   end;
 end;
 

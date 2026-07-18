@@ -87,6 +87,7 @@ type
     FWithinDuration: TTimeSpan;
   public
     constructor Create(AExceptionTypes: TArray<ExceptClass>); override;
+    destructor Destroy; override;
     function CircuitState: TCircuitState;
     procedure Execute(AProc: TProc);
     function Fail(ATimes: Integer = 2): ICircuitBreakerPolicy;
@@ -131,19 +132,30 @@ begin
   FWithinDuration := TTimeSpan.FromSeconds(30);
 end;
 
+destructor TCircuitBreakerPolicy.Destroy;
+begin
+  FBrokenFor.Free;
+  inherited Destroy;
+end;
+
 procedure TCircuitBreakerPolicy.Execute(AProc: TProc);
 begin
-  // Checks if circuit has been manually isolated.
-  if FCircuitState = TCircuitState.Isolated then
-    raise EBrokenCircuitException.Create(StrErrCircuitBroken, FBrokenFor);
-
-  // Checks if circuit is open and its time to try closing it again.
-  if FCircuitState = TCircuitState.Open then
-  begin
-    var LDurationExpired := (FBrokenAt + FWithinDuration) < Now;
-    if not LDurationExpired then
+  TMonitor.Enter(Self);
+  try
+    // Checks if circuit has been manually isolated.
+    if FCircuitState = TCircuitState.Isolated then
       raise EBrokenCircuitException.Create(StrErrCircuitBroken, FBrokenFor);
-    FCircuitState := TCircuitState.HalfOpen;
+
+    // Checks if circuit is open and its time to try closing it again.
+    if FCircuitState = TCircuitState.Open then
+    begin
+      var LDurationExpired := (FBrokenAt + FWithinDuration) < Scheduler.Now;
+      if not LDurationExpired then
+        raise EBrokenCircuitException.Create(StrErrCircuitBroken, FBrokenFor);
+      FCircuitState := TCircuitState.HalfOpen;
+    end;
+  finally
+    TMonitor.Exit(Self);
   end;
 
   // Executes the action submitted to the policy.
@@ -155,21 +167,37 @@ begin
       // Checks if the exception type must be handled.
       if not IsHandled(E) then
         raise;
-      // Put the circuit in "open" state if required.
-      Inc(FFailCount);
-      if (FFailCount >= FFailTimes) or (FCircuitState = TCircuitState.HalfOpen) then
-      begin
-        FCircuitState := TCircuitState.Open;
-        FBrokenAt := Scheduler.Now;
-        FBrokenFor := E;
+      TMonitor.Enter(Self);
+      try
+        // Put the circuit in "open" state if required.
+        Inc(FFailCount);
+        if (FFailCount >= FFailTimes) or (FCircuitState = TCircuitState.HalfOpen) then
+        begin
+          FCircuitState := TCircuitState.Open;
+          FBrokenAt := Scheduler.Now;
+          // Keeps an owned copy of the failure: the original exception
+          // is destroyed by the caller's exception handler.
+          FBrokenFor.Free;
+          FBrokenFor := ExceptClass(E.ClassType).Create(E.Message);
+        end;
+      finally
+        TMonitor.Exit(Self);
       end;
       // Re-raise the handled exception.
       raise;
     end;
   end;
-  // Restores the "closed" state for the circuit.
-  if FCircuitState = TCircuitState.HalfOpen then
-    Reset;
+  TMonitor.Enter(Self);
+  try
+    // Restores the "closed" state for the circuit
+    // and heals the failure count after a success.
+    if FCircuitState = TCircuitState.HalfOpen then
+      Reset
+    else
+      FFailCount := 0;
+  finally
+    TMonitor.Exit(Self);
+  end;
 end;
 
 function TCircuitBreakerPolicy.Fail(ATimes: Integer): ICircuitBreakerPolicy;
@@ -180,20 +208,35 @@ end;
 
 function TCircuitBreakerPolicy.CircuitState: TCircuitState;
 begin
-  Result := FCircuitState;
+  TMonitor.Enter(Self);
+  try
+    Result := FCircuitState;
+  finally
+    TMonitor.Exit(Self);
+  end;
 end;
 
 procedure TCircuitBreakerPolicy.Isolate;
 begin
-  FCircuitState := TCircuitState.Isolated;
+  TMonitor.Enter(Self);
+  try
+    FCircuitState := TCircuitState.Isolated;
+  finally
+    TMonitor.Exit(Self);
+  end;
 end;
 
 procedure TCircuitBreakerPolicy.Reset;
 begin
-  FCircuitState := TCircuitState.Closed;
-  FBrokenAt := MinDateTime;
-  FBrokenFor := nil;
-  FFailCount := 0;
+  TMonitor.Enter(Self);
+  try
+    FCircuitState := TCircuitState.Closed;
+    FBrokenAt := MinDateTime;
+    FreeAndNil(FBrokenFor);
+    FFailCount := 0;
+  finally
+    TMonitor.Exit(Self);
+  end;
 end;
 
 function TCircuitBreakerPolicy.Within(ADuration: TTimeSpan): ICircuitBreakerPolicy;

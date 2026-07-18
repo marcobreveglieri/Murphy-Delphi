@@ -90,6 +90,7 @@ begin
   var
   LContext := TRetryContext.Create;
   try
+    LContext.FWaitDelay := FWaitDelay;
     while True do
     begin
       Inc(LContext.FAttempts);
@@ -106,6 +107,9 @@ begin
             raise;
           if (FRetryTimes >= 0) and (LContext.Attempts > FRetryTimes) then
             raise;
+          // The exception object is destroyed when this handler exits,
+          // so the context must not keep a reference across attempts.
+          LContext.FException := nil;
           Scheduler.WaitFor(LContext.WaitDelay);
         end;
       end;
