@@ -8,7 +8,7 @@
 **Murphy for Delphi** is a Chaos Engineering library that implements resilience and fault-tolerance patterns for Delphi applications. Named after Murphy's Law ("Anything that can go wrong will go wrong"), it helps you build systems that gracefully handle failures like network timeouts, service outages, and resource exhaustion.
 
 > **⚠️ Early Development Notice**
-> This library is in early development (v0.1.0) and under active refactoring. Expect substantial changes in upcoming releases.
+> This library is in early development and under active refactoring. Expect substantial changes in upcoming releases.
 
 ## Why Murphy?
 
@@ -273,7 +273,7 @@ end;
 3. **Create a policy** using the builder pattern
 4. **Execute your code** within the policy
 
-See the [Getting Started Guide](Docs/02-Getting-Started.md) for detailed examples and the [Demo Application](Demos/00_Primer) for interactive examples of all patterns.
+See the [Getting Started Guide](https://github.com/marcobreveglieri/murphy-delphi/wiki/02-Getting-Started) for detailed examples and the [Demo Application](Demos/00_Primer) for interactive examples of all patterns.
 
 ## Documentation
 
@@ -289,7 +289,7 @@ Murphy for Delphi is released under the MIT License. See the [LICENSE](LICENSE) 
 
 ## Contributing
 
-Contributions are welcome! Please see the [Contributing Guide](Docs/Advanced/Contributing.md) for details.
+Contributions are welcome! Please see the [Contributing Guide](https://github.com/marcobreveglieri/murphy-delphi/wiki/Advanced/Contributing) for details.
 
 ## Support & Resources
 

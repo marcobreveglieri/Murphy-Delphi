@@ -1,0 +1,33 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Murphy for Delphi
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Marco
+    family-names: Breveglieri
+    email: brevve@gmail.com
+repository-code: 'https://github.com/marcobreveglieri/murphy-delphi'
+url: 'https://github.com/marcobreveglieri/murphy-delphi/wiki'
+abstract: >-
+  Murphy for Delphi is an open-source Chaos Engineering
+  library that implements resilience and fault-tolerance
+  patterns for Delphi applications. Named after Murphy's
+  Law, it provides ready-to-use, composable policies —
+  Retry, Circuit Breaker, Fallback, Rate Limit, Timeout,
+  Bulkhead, Cache, Hedging, and Policy Wrap — through a
+  fluent, type-safe builder API, helping developers handle
+  failures like network timeouts, service outages, and
+  resource exhaustion gracefully.
+keywords:
+  - delphi
+  - chaos-engineering
+  - resilience
+  - fault-tolerance
+  - retry
+  - circuit-breaker
+license: MIT
