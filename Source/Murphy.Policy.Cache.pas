@@ -106,17 +106,21 @@ begin
     begin
       if not IsHandled(E) then
         raise;
+      // Serves the stale value (expired values are deliberately
+      // kept) as the last known good result; when the cache is
+      // empty there is nothing to serve, so the failure surfaces.
+      var LHasValue: Boolean;
+      var LCachedValue: TResult;
       TMonitor.Enter(Self);
       try
-        // Serves the stale value (expired values are deliberately
-        // kept) as the last known good result; when the cache is
-        // empty there is nothing to serve, so the failure surfaces.
-        if not FHasValue then
-          raise;
-        Exit(FCachedValue);
+        LHasValue := FHasValue;
+        LCachedValue := FCachedValue;
       finally
         TMonitor.Exit(Self);
       end;
+      if not LHasValue then
+        raise;
+      Exit(LCachedValue);
     end;
   end;
 
