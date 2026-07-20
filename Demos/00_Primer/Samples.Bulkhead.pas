@@ -30,19 +30,19 @@ begin
           LPolicy.Execute(
             procedure
             begin
-              Writeln('Task n. ', LTaskNumber, ': slot acquisito, lavoro in corso...');
+              Writeln('Task no. ', LTaskNumber, ': slot acquired, work in progress...');
               Sleep(500);
             end
           );
         except on E: Exception do
-          Writeln('Task n. ', LTaskNumber, ' rifiutato - ', E.ClassName, ': ', E.Message);
+          Writeln('Task no. ', LTaskNumber, ' rejected - ', E.ClassName, ': ', E.Message);
         end;
       end);
     Sleep(20);
   end;
 
   TTask.WaitForAll(LTasks);
-  Writeln('Tutti i task sono terminati.');
+  Writeln('All tasks have finished.');
 end;
 
 end.

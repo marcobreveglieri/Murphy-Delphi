@@ -22,27 +22,27 @@ begin
     var LResult := LPolicy.Execute(
       function: string
       begin
-        Writeln('...calcolo del valore in corso (operazione costosa)...');
+        Writeln('...computing the value (expensive operation)...');
         Sleep(300);
-        Result := 'valore calcolato alle ' + FormatDateTime('hh:nn:ss.zzz', Now);
+        Result := 'value computed at ' + FormatDateTime('hh:nn:ss.zzz', Now);
       end
     );
-    Writeln('Chiamata n. ', LCallIndex, ': ', LResult);
+    Writeln('Call no. ', LCallIndex, ': ', LResult);
     Sleep(800);
   end;
 
-  // Quando il refresh fallisce con un'eccezione gestita,
-  // viene restituito l'ultimo valore valido in cache.
+  // When the refresh fails with a handled exception,
+  // the last valid cached value is returned.
   Writeln;
-  Writeln('Refresh fallito: viene servito il valore in cache...');
+  Writeln('Refresh failed: serving the cached value...');
   Sleep(2500);
   var LStaleResult := LPolicy.Execute(
     function: string
     begin
-      raise ENotImplemented.Create('Servizio non disponibile');
+      raise ENotImplemented.Create('Service unavailable');
     end
   );
-  Writeln('Valore stantio: ', LStaleResult);
+  Writeln('Stale value: ', LStaleResult);
 end;
 
 end.

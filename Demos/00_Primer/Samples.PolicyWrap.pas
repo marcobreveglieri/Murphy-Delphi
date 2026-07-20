@@ -15,8 +15,8 @@ uses
 
 procedure RunPolicyWrapSample;
 begin
-  // Combina Retry (esterno) e Timeout (interno): ogni tentativo ha
-  // un proprio timeout e i tentativi scaduti vengono ritentati.
+  // Combines Retry (outer) and Timeout (inner): each attempt has
+  // its own timeout, and attempts that time out are retried.
   var LWrap := TPolicyWrapBuilder.Wrap([
     TRetryBuilder
       .Handle(ETimeoutRejectedException)
@@ -34,11 +34,11 @@ begin
       procedure
       begin
         Inc(LAttempts);
-        Writeln('Chiamata al database... (tentativo n. ', LAttempts, ')');
-        // I primi due tentativi superano il timeout di 1 secondo.
+        Writeln('Calling the database... (attempt no. ', LAttempts, ')');
+        // The first two attempts exceed the 1-second timeout.
         if LAttempts <= 2 then
           Sleep(2000);
-        Writeln('Chiamata completata con successo!');
+        Writeln('Call completed successfully!');
       end
     );
   except on E: Exception do

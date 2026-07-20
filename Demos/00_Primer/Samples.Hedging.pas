@@ -14,8 +14,8 @@ uses
 
 procedure RunHedgingSample;
 begin
-  // Nota: le azioni sottoposte a hedging devono essere idempotenti,
-  // perche' i tentativi perdenti continuano a girare in background.
+  // Note: actions subject to hedging must be idempotent,
+  // because the losing attempts keep running in the background.
   var LAttemptIndex := 0;
 
   var LPolicy := THedgingBuilder
@@ -25,16 +25,16 @@ begin
     .OnHedging(
       procedure(AContext: THedgingContext)
       begin
-        Writeln('Endpoint lento: lancio del tentativo parallelo n. ',
+        Writeln('Slow endpoint: launching parallel attempt no. ',
           AContext.AttemptNumber, '...');
       end);
 
-  Writeln('Chiamata a un endpoint lento (il primo tentativo impiega 3 secondi)...');
+  Writeln('Calling a slow endpoint (the first attempt takes 3 seconds)...');
 
   LPolicy.Execute(
     procedure
     begin
-      // Il tentativo primario e' lento, quello parallelo risponde subito.
+      // The primary attempt is slow, the parallel one responds right away.
       if TInterlocked.Increment(LAttemptIndex) = 1 then
         Sleep(3000)
       else
@@ -42,19 +42,19 @@ begin
     end
   );
 
-  Writeln('Risposta ricevuta dal tentativo piu'' veloce!');
+  Writeln('Response received from the fastest attempt!');
 
-  // Attende il tentativo abbandonato prima di terminare la demo.
+  // Waits for the abandoned attempt before ending the demo.
   Sleep(3000);
 
   Writeln;
-  Writeln('Ora tutti i tentativi falliscono...');
+  Writeln('Now all attempts fail...');
 
   try
     LPolicy.Execute(
       procedure
       begin
-        raise ENotImplemented.Create('Servizio non disponibile');
+        raise ENotImplemented.Create('Service unavailable');
       end
     );
   except on E: Exception do
