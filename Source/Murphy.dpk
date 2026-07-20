@@ -39,6 +39,10 @@ contains
   Murphy.Policy.Fallback in 'Murphy.Policy.Fallback.pas',
   Murphy.Resources.Strings in 'Murphy.Resources.Strings.pas',
   Murphy.Policy.RateLimit in 'Murphy.Policy.RateLimit.pas',
-  Murphy.Policy.Timeout in 'Murphy.Policy.Timeout.pas';
+  Murphy.Policy.Timeout in 'Murphy.Policy.Timeout.pas',
+  Murphy.Policy.Bulkhead in 'Murphy.Policy.Bulkhead.pas',
+  Murphy.Policy.Cache in 'Murphy.Policy.Cache.pas',
+  Murphy.Policy.Wrap in 'Murphy.Policy.Wrap.pas',
+  Murphy.Policy.Hedging in 'Murphy.Policy.Hedging.pas';
 
 end.

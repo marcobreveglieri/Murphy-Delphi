@@ -38,9 +38,8 @@ type
   /// <summary>
   ///  Represents the interface of the "Timeout" policy pattern.
   /// </summary>
-  ITimeoutPolicy = interface(IPolicy)
+  ITimeoutPolicy = interface(IExecutablePolicy)
     ['{8B3E9F12-4A7C-4D1E-9B5A-2E8C7F6D4A91}']
-    procedure Execute(AProc: TProc);
     function After(ADuration: TTimeSpan): ITimeoutPolicy;
     function OnTimeout(ACallback: TProc<TTimeoutContext>): ITimeoutPolicy;
   end;

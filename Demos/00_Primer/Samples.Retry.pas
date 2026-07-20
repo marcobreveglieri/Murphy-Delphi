@@ -37,12 +37,12 @@ begin
       procedure
       begin
         Inc(LCounter);
-        Writeln('Tentativo n. ', LCounter);
+        Writeln('Attempt no. ', LCounter);
         LResult := TFile.ReadAllText('E:\Temp\Test.txt');
       end
     );
 
-  Writeln('Risultato: ', LResult);
+  Writeln('Result: ', LResult);
 end;
 
 end.

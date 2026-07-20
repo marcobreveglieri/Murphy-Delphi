@@ -26,24 +26,24 @@ begin
   begin
 
     Inc(LCounter);
-    Writeln('Tentativo n. ', LCounter);
-    Writeln('Stato before:', TRttiEnumerationType.GetName<TCircuitState>(LPolicy.CircuitState));
+    Writeln('Attempt no. ', LCounter);
+    Writeln('State before:', TRttiEnumerationType.GetName<TCircuitState>(LPolicy.CircuitState));
 
     try
       LPolicy.Execute(
         procedure
         begin
-          Writeln('Stato middle:', TRttiEnumerationType.GetName<TCircuitState>(LPolicy.CircuitState));
+          Writeln('State middle:', TRttiEnumerationType.GetName<TCircuitState>(LPolicy.CircuitState));
           if LCounter < 3 then
             raise ENotImplemented.Create('Not implemented');
-          Writeln('Eseguito  n. ', LCounter);
+          Writeln('Executed  no. ', LCounter);
         end
       );
     except on E: Exception do
       Writeln('E: ', E.Message);
     end;
 
-    Writeln('Stato after :', TRttiEnumerationType.GetName<TCircuitState>(LPolicy.CircuitState));
+    Writeln('State after :', TRttiEnumerationType.GetName<TCircuitState>(LPolicy.CircuitState));
 
     if (LCounter > 10) then
       LPolicy.Isolate;

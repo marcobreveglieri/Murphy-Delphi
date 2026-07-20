@@ -24,10 +24,9 @@ type
   /// <summary>
   ///  Represents the interface of the "Rate Limit" policy pattern.
   /// </summary>
-  IRateLimitPolicy = interface(IPolicy)
+  IRateLimitPolicy = interface(IExecutablePolicy)
     ['{B4AFFB0E-C958-4D89-A2BC-79659915581E}']
     function Allow(ACalls: Integer): IRateLimitPolicy;
-    procedure Execute(AProc: TProc);
     function Within(ADuration: TTimeSpan): IRateLimitPolicy;
   end;
 

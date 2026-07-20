@@ -62,10 +62,9 @@ type
   /// <summary>
   ///  Represents the interface of the "Circuit Breaker" policy pattern.
   /// </summary>
-  ICircuitBreakerPolicy = interface (IPolicy)
+  ICircuitBreakerPolicy = interface (IExecutablePolicy)
     ['{79052D2E-9BE6-42BC-B2F2-C422E991A1F4}']
     function CircuitState: TCircuitState;
-    procedure Execute(AProc: TProc);
     function Fail(ATimes: Integer = 2): ICircuitBreakerPolicy;
     procedure Isolate;
     procedure Reset;

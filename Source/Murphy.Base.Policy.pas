@@ -18,6 +18,18 @@ type
     function IsHandled(AException: Exception): Boolean;
   end;
 
+{ IExecutablePolicy }
+
+  /// <summary>
+  ///  Represents the contract for policies that can execute
+  ///  a parameterless action. Policies implementing this interface
+  ///  can participate in a policy wrap.
+  /// </summary>
+  IExecutablePolicy = interface(IPolicy)
+    ['{79460F38-81AD-48CF-8A2A-F10028F86F1B}']
+    procedure Execute(AProc: TProc);
+  end;
+
 { TPolicy }
 
   /// <summary>

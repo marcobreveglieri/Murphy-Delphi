@@ -32,7 +32,7 @@ begin
       LPolicy.Execute(
         procedure
         begin
-          Writeln('Tentativo n. ', LCounter);
+          Writeln('Attempt no. ', LCounter);
         end
       );
 

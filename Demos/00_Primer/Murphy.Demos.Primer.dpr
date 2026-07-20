@@ -10,7 +10,11 @@ uses
   Samples.CircuitBreaker in 'Samples.CircuitBreaker.pas',
   Samples.Fallback in 'Samples.Fallback.pas',
   Samples.RateLimit in 'Samples.RateLimit.pas',
-  Samples.Timeout in 'Samples.Timeout.pas';
+  Samples.Timeout in 'Samples.Timeout.pas',
+  Samples.Bulkhead in 'Samples.Bulkhead.pas',
+  Samples.Cache in 'Samples.Cache.pas',
+  Samples.Hedging in 'Samples.Hedging.pas',
+  Samples.PolicyWrap in 'Samples.PolicyWrap.pas';
 
 begin
   ReportMemoryLeaksOnShutdown := True;
@@ -20,8 +24,12 @@ begin
     while True do
     begin
       Writeln('--------------------');
+      Writeln('B) Bulkhead');
+      Writeln('A) Cache');
       Writeln('C) Circuit Breaker');
       Writeln('F) Fallback');
+      Writeln('H) Hedging');
+      Writeln('W) Policy Wrap');
       Writeln('L) Rate Limit');
       Writeln('R) Retry');
       Writeln('T) Timeout');
@@ -44,11 +52,15 @@ begin
       Writeln;
 
       case LCommand.Chars[0] of
+        'A': RunCacheSample;
+        'B': RunBulkheadSample;
         'C': RunCircuitBreakerSample;
         'F': RunFallbackSample;
+        'H': RunHedgingSample;
         'L': RunRateLimitSample;
         'R': RunRetrySample;
         'T': RunTimeoutSample;
+        'W': RunPolicyWrapSample;
       end;
 
     end;

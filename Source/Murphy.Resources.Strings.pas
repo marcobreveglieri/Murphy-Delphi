@@ -5,7 +5,10 @@ interface
 { Resource strings }
 
 resourcestring
+  StrErrBulkheadRejected = 'Bulkhead limit reached: execution rejected';
   StrErrCircuitBroken = 'Circuit is open or isolated and is not allowing calls';
+  StrErrHedgingInvalidAttempts = 'Hedging attempts count must be zero or greater';
+  StrErrPolicyWrapNoPolicies = 'Policy wrap requires at least one policy';
   StrErrRateLimitExceeded = 'Rate limit exceeded: retry later';
   StrErrTimeoutExceeded = 'Operation exceeded the timeout duration';
 
