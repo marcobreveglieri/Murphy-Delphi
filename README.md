@@ -45,10 +45,10 @@ end;
 
 ## Installation
 
-### Using Boss Package Manager (Recommended)
+### Using Blocks Package Manager (Recommended)
 
 ```bash
-boss install marcobreveglieri/murphy-delphi
+blocks install marcobreveglieri.murphy-delphi
 ```
 
 ### Manual Installation
@@ -268,7 +268,7 @@ end;
 
 ## Quick Start
 
-1. **Install Murphy** using Boss or manually
+1. **Install Murphy** using Blocks or manually
 2. **Add the unit** to your uses clause: `Murphy.Policy.Retry`
 3. **Create a policy** using the builder pattern
 4. **Execute your code** within the policy

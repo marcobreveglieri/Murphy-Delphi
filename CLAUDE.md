@@ -31,8 +31,8 @@ msbuild Demos\00_Primer\Murphy.Demos.Primer.dpr
 
 ### Package Installation
 ```bash
-# Via Boss package manager (recommended)
-boss install marcobreveglieri/murphy-delphi
+# Via Blocks package manager (recommended)
+blocks install marcobreveglieri.murphy-delphi
 
 # Manual installation: Add Source\ folder to project search path
 ```

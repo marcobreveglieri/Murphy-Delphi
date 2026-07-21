@@ -1,9 +1,0 @@
-{
-	"name": "murphy-delphi",
-	"description": "Murphy library for Embarcadero Delphi",
-	"version": "0.1.0",
-	"homepage": "https://github.com/marcobreveglieri/murphy-delphi",
-	"mainsrc": "./Source",
-	"projects": [],
-	"dependencies": {}
-}
