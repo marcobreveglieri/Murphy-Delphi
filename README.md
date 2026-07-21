@@ -5,10 +5,15 @@
 
 # Murphy for Delphi
 
+[![Release](https://img.shields.io/github/v/release/marcobreveglieri/murphy-delphi?label=release&color=2ea44f)](https://github.com/marcobreveglieri/murphy-delphi/releases)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Delphi](https://img.shields.io/badge/Delphi-11%2B-E62431)](https://www.embarcadero.com/products/delphi)
+[![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Android%20%7C%20iOS-informational)]()
+
 **Murphy for Delphi** is a Chaos Engineering library that implements resilience and fault-tolerance patterns for Delphi applications. Named after Murphy's Law ("Anything that can go wrong will go wrong"), it helps you build systems that gracefully handle failures like network timeouts, service outages, and resource exhaustion.
 
-> **⚠️ Early Development Notice**
-> This library is in early development and under active refactoring. Expect substantial changes in upcoming releases.
+> **ℹ️ Stable Release**
+> Murphy for Delphi 1.0.0 is the first stable release. The public API is considered stable; new patterns and improvements will follow in a backward-compatible way where possible.
 
 ## Why Murphy?
 

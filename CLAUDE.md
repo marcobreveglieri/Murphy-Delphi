@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Murphy for Delphi is a Chaos Engineering library that implements resilience patterns for Delphi applications. The library provides ready-to-use policy classes that help developers test and improve system reliability by handling failures gracefully.
 
-**Important**: This library is in early development (v0.1.0) and under heavy refactoring. Expect substantial changes.
+**Important**: This library reached its first stable release (v1.0.0). The public API is considered stable; new patterns and improvements will follow in a backward-compatible way where possible.
 
 ## Build and Test Commands
 
