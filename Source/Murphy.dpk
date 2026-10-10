@@ -48,6 +48,7 @@ contains
   Murphy.Chaos.Fault in 'Murphy.Chaos.Fault.pas',
   Murphy.Chaos.Latency in 'Murphy.Chaos.Latency.pas',
   Murphy.Chaos.Behavior in 'Murphy.Chaos.Behavior.pas',
+  Murphy.Chaos.Outcome in 'Murphy.Chaos.Outcome.pas',
   Murphy.Base.Chaos in 'Murphy.Base.Chaos.pas';
 
 end.

@@ -20,6 +20,7 @@ uses
   Murphy.Tests.Chaos.Fault in 'Murphy.Tests.Chaos.Fault.pas',
   Murphy.Tests.Chaos.Helpers in 'Murphy.Tests.Chaos.Helpers.pas',
   Murphy.Tests.Chaos.Latency in 'Murphy.Tests.Chaos.Latency.pas',
+  Murphy.Tests.Chaos.Outcome in 'Murphy.Tests.Chaos.Outcome.pas',
   Murphy.Tests.CircuitBreaker in 'Murphy.Tests.CircuitBreaker.pas',
   Murphy.Tests.Fallback in 'Murphy.Tests.Fallback.pas',
   Murphy.Tests.Hedging in 'Murphy.Tests.Hedging.pas',
