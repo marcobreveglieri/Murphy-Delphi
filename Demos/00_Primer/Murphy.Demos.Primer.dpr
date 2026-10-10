@@ -14,7 +14,8 @@ uses
   Samples.Bulkhead in 'Samples.Bulkhead.pas',
   Samples.Cache in 'Samples.Cache.pas',
   Samples.Hedging in 'Samples.Hedging.pas',
-  Samples.PolicyWrap in 'Samples.PolicyWrap.pas';
+  Samples.PolicyWrap in 'Samples.PolicyWrap.pas',
+  Samples.Chaos in 'Samples.Chaos.pas';
 
 begin
   ReportMemoryLeaksOnShutdown := True;
@@ -26,6 +27,7 @@ begin
       Writeln('--------------------');
       Writeln('B) Bulkhead');
       Writeln('A) Cache');
+      Writeln('X) Chaos');
       Writeln('C) Circuit Breaker');
       Writeln('F) Fallback');
       Writeln('H) Hedging');
@@ -61,6 +63,7 @@ begin
         'R': RunRetrySample;
         'T': RunTimeoutSample;
         'W': RunPolicyWrapSample;
+        'X': RunChaosSample;
       end;
 
     end;

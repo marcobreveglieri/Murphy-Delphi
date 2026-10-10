@@ -10,7 +10,7 @@
 [![Delphi](https://img.shields.io/badge/Delphi-11%2B-E62431)](https://www.embarcadero.com/products/delphi)
 [![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Android%20%7C%20iOS-informational)]()
 
-**Murphy for Delphi** is a Chaos Engineering library that implements resilience and fault-tolerance patterns for Delphi applications. Named after Murphy's Law ("Anything that can go wrong will go wrong"), it helps you build systems that gracefully handle failures like network timeouts, service outages, and resource exhaustion.
+**Murphy for Delphi** is a Chaos Engineering library that implements resilience and fault-tolerance patterns for Delphi applications, together with chaos strategies that inject failures on purpose to prove those patterns work. Named after Murphy's Law ("Anything that can go wrong will go wrong"), it helps you build systems that gracefully handle failures like network timeouts, service outages, and resource exhaustion.
 
 > **ℹ️ Stable Release**
 > Murphy for Delphi 1.0.0 is the first stable release. The public API is considered stable; new patterns and improvements will follow in a backward-compatible way where possible.
@@ -41,6 +41,7 @@ end;
 ## Key Features
 
 - **🎯 Ready-to-Use Patterns** - Retry, Circuit Breaker, Fallback, Rate Limit, Timeout, Bulkhead, Cache, Hedging, and Policy Wrap implementations
+- **🐒 Chaos Strategies** - Inject faults, latency, custom behaviors and fake outcomes to verify your resilience strategies
 - **🔗 Fluent API** - Intuitive, chainable builder pattern for easy configuration
 - **💪 Type-Safe** - Leverages Delphi generics for compile-time type safety
 - **🎭 Exception Filtering** - Handle only specific exception types
@@ -270,6 +271,55 @@ end;
 ```
 
 **Use cases**: Sophisticated resilience strategies, combining retry/timeout/circuit breaker
+
+## Chaos Engineering
+
+Resilience patterns are only as good as the failures they have been tested against. Murphy includes four chaos strategies, modeled on [Polly's chaos engineering](https://www.pollydocs.org/chaos/), that inject failures on purpose in a configurable fraction of executions:
+
+| Strategy | Unit | What it injects |
+|---|---|---|
+| Fault | `Murphy.Chaos.Fault` | Raises an exception instead of running the action |
+| Latency | `Murphy.Chaos.Latency` | Waits before running the action |
+| Behavior | `Murphy.Chaos.Behavior` | Runs custom code (e.g. dropping a connection) before the action |
+| Outcome | `Murphy.Chaos.Outcome` | Returns a fake result instead of running the function |
+
+```pascal
+uses Murphy.Chaos.Fault, Murphy.Chaos.Latency, Murphy.Policy.Retry, Murphy.Policy.Wrap;
+
+var
+  Policy: IPolicyWrap;
+begin
+  Policy := TPolicyWrapBuilder.Wrap([
+    TRetryBuilder
+      .Handle(ENetworkError)
+      .Retry(3),                         // The resilience under test...
+    TChaosFaultBuilder
+      .InjectionRate(0.1)                // ...10% of the calls fail
+      .Fault(ENetworkError, 'Injected connection reset'),
+    TChaosLatencyBuilder
+      .InjectionRate(0.2)                // ...20% of the calls are slow
+      .Latency(TTimeSpan.FromSeconds(2))
+  ]);
+
+  Policy.Execute(procedure begin CallExternalService; end);
+end;
+```
+
+Every chaos policy shares the same options:
+
+- `InjectionRate(Rate)` / `InjectionRateGenerator(Func)` - fraction of the executions affected, from 0 to 1 (default 0.001); the generator runs at every execution and wins over the fixed value
+- `Enabled(Value)` / `EnabledGenerator(Func)` - turns the policy on or off, e.g. only for test users or environments
+- `Randomizer(Func)` - replaces the random generator, for deterministic tests
+- `OnFaultInjected`, `OnLatencyInjected`, `OnBehaviorInjected`, `OnOutcomeInjected` - callbacks to log what has been injected
+
+Guidelines:
+
+- **Place chaos policies last** (innermost) in a policy wrap, so the resilience policies around them react to the injected failures
+- **Control the blast radius**: set the `MurphyChaosEnabled` flag (`Murphy.Globals`) to `False` to turn off every chaos policy at once, e.g. in production builds, and use `EnabledGenerator` to limit chaos to selected users or environments
+- **Use Fault for exceptions** and Outcome for fake results; being generic on the result type like Fallback and Cache, Outcome does not join a policy wrap: call it inside the function executed by the other policies
+- Latency waits through the scheduler service, so test mode (`MurphyTestModeEnabled`) skips the delay
+
+**Use cases**: Testing retries, timeouts, circuit breakers and fallbacks against realistic failures, game days, resilience regression tests
 
 ## Quick Start
 

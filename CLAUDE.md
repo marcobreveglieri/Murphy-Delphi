@@ -80,6 +80,19 @@ All policies follow a consistent builder pattern with three layers:
 - Only policy that uses `TFunc<TResult>` instead of `TProc`
 - Usage: `TFallbackBuilder<String>.Handle([E]).Fallback(fallbackFunc).Execute(func)`
 
+### Chaos Strategies
+
+Modeled on Polly's chaos engineering (https://www.pollydocs.org/chaos/), they inject failures on purpose to test the resilience policies.
+
+- **Base** (`Murphy.Base.Chaos.pas`): `TChaosPolicy` (derives from `TPolicy`) holds the common options and decides via `ShouldInject`: global `MurphyChaosEnabled` switch → `Enabled`/`EnabledGenerator` → `InjectionRate`/`InjectionRateGenerator` (default 0.001, rate 0 never and 1 always) compared with the randomizer
+- **Fault** (`Murphy.Chaos.Fault.pas`): raises an exception instead of the action (`EChaosFaultException` by default)
+- **Latency** (`Murphy.Chaos.Latency.pas`): waits via `Scheduler.WaitFor` (skipped in test mode), then runs the action
+- **Behavior** (`Murphy.Chaos.Behavior.pas`): runs custom code before the action
+- **Outcome** (`Murphy.Chaos.Outcome.pas`): generic `TFunc<TResult>` policy returning a fake result; like Fallback/Cache it cannot join a `TPolicyWrap`
+- Builders are sealed and do not derive from `TPolicyBuilder` (chaos does not filter exceptions): the entry point is `InjectionRate(Rate)` or `InjectionRateGenerator(Func)`
+- Every interface redeclares the common fluent options (Delphi has no covariant returns); generator variants use distinct names (`...Generator`) instead of overloads, so a function is never evaluated once at configuration time by mistake
+- Chaos policies go last (innermost) in a `TPolicyWrap`
+
 ### Service Abstraction Layer
 
 **Scheduler Service** (`Murphy.Services.Schedulers.pas`):
@@ -88,6 +101,11 @@ All policies follow a consistent builder pattern with three layers:
 - `TTestScheduler`: Mocked for testing (no sleep, fixed time)
 - Controlled by global flag `MurphyTestModeEnabled` in `Murphy.Globals.pas`
 - Used by Retry (delays), Circuit Breaker (time tracking), and Rate Limit (bucket expiry)
+
+**Randomizer Service** (`Murphy.Services.Randomizers.pas`):
+- `IRandomizer.NextDouble` returns values in [0, 1) for the chaos injection decision
+- Shared lock-free SplitMix64 instance: thread-safe, and it does not touch the application's `RandSeed`
+- Not affected by test mode: tests use rates 0/1 or a per-policy `Randomizer(Func)` for deterministic results
 
 ### Exception Handling Strategy
 
@@ -113,7 +131,10 @@ TRetryBuilder.Handle([E])
   - `Murphy.dpk` - Package definition (requires only RTL)
   - `Murphy.Base.Policy.pas` - Base policy framework
   - `Murphy.Policy.*.pas` - Individual pattern implementations
+  - `Murphy.Base.Chaos.pas` - Base class of the chaos strategies
+  - `Murphy.Chaos.*.pas` - Chaos strategy implementations
   - `Murphy.Services.Schedulers.pas` - Time abstraction service
+  - `Murphy.Services.Randomizers.pas` - Random number service for chaos injection
   - `Murphy.Globals.pas` - Global configuration (test mode flag)
   - `Murphy.Resources.Strings.pas` - Localized error messages
 - `Tests/` - DUnitX test suite
@@ -132,3 +153,9 @@ TRetryBuilder.Handle([E])
 - Circuit Breaker stores last exception in `FBrokenFor` field for inner exception pattern
 - Rate Limit uses GUID tokens to track available call slots
 - Retry pattern allows runtime modification of wait delay via `TRetryContext.WaitDelay`
+- Chaos Fault frees the generated exception when `OnFaultInjected` raises, since the fault is then never raised
+
+## Testing Notes
+
+- Delphi implements all the anonymous methods of a routine on one shared frame object. In a test, a closure that captures the policy variable (e.g. inside `Assert.WillRaise`) plus a closure stored in the policy (callback, generator) creates a reference cycle and a memory leak. The chaos tests use `ExecuteCatching` from `Tests/Murphy.Tests.Chaos.Helpers.pas` instead, or build the policy in a separate routine
+- Some pre-existing fixtures leak this way at shutdown; to check new code for leaks run only its fixtures, e.g. `Murphy.Tests.exe --run:Murphy.Tests.Chaos`, and expect an empty leak report

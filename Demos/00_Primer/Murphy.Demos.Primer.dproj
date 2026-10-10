@@ -195,6 +195,7 @@
         <DCCReference Include="Samples.Cache.pas"/>
         <DCCReference Include="Samples.Hedging.pas"/>
         <DCCReference Include="Samples.PolicyWrap.pas"/>
+        <DCCReference Include="Samples.Chaos.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
