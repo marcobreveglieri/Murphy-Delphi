@@ -321,6 +321,8 @@ Guidelines:
 
 **Use cases**: Testing retries, timeouts, circuit breakers and fallbacks against realistic failures, game days, resilience regression tests
 
+**Demos**: the Chaos menu (`X`) of the [demo application](Demos/00_Primer) runs one scenario for each strategy: fault and latency against a retry, latency against a timeout, a simulated outage against a circuit breaker, fake responses against a fallback, and a dropped connection limited to a test user.
+
 ## Quick Start
 
 1. **Install Murphy** using Blocks or manually
