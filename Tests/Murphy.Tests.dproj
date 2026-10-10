@@ -164,6 +164,7 @@
         <DCCReference Include="Murphy.Tests.Chaos.Common.pas"/>
         <DCCReference Include="Murphy.Tests.Chaos.Fault.pas"/>
         <DCCReference Include="Murphy.Tests.Chaos.Helpers.pas"/>
+        <DCCReference Include="Murphy.Tests.Chaos.Latency.pas"/>
         <DCCReference Include="Murphy.Tests.CircuitBreaker.pas"/>
         <DCCReference Include="Murphy.Tests.Fallback.pas"/>
         <DCCReference Include="Murphy.Tests.Hedging.pas"/>

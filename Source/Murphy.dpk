@@ -46,6 +46,7 @@ contains
   Murphy.Policy.Hedging in 'Murphy.Policy.Hedging.pas',
   Murphy.Services.Randomizers in 'Murphy.Services.Randomizers.pas',
   Murphy.Chaos.Fault in 'Murphy.Chaos.Fault.pas',
+  Murphy.Chaos.Latency in 'Murphy.Chaos.Latency.pas',
   Murphy.Base.Chaos in 'Murphy.Base.Chaos.pas';
 
 end.
