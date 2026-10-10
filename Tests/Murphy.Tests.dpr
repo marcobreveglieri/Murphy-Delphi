@@ -15,6 +15,7 @@ uses
   DUnitX.TestFramework,
   Murphy.Tests.Bulkhead in 'Murphy.Tests.Bulkhead.pas',
   Murphy.Tests.Cache in 'Murphy.Tests.Cache.pas',
+  Murphy.Tests.Chaos.Common in 'Murphy.Tests.Chaos.Common.pas',
   Murphy.Tests.CircuitBreaker in 'Murphy.Tests.CircuitBreaker.pas',
   Murphy.Tests.Fallback in 'Murphy.Tests.Fallback.pas',
   Murphy.Tests.Hedging in 'Murphy.Tests.Hedging.pas',

@@ -43,6 +43,8 @@ contains
   Murphy.Policy.Bulkhead in 'Murphy.Policy.Bulkhead.pas',
   Murphy.Policy.Cache in 'Murphy.Policy.Cache.pas',
   Murphy.Policy.Wrap in 'Murphy.Policy.Wrap.pas',
-  Murphy.Policy.Hedging in 'Murphy.Policy.Hedging.pas';
+  Murphy.Policy.Hedging in 'Murphy.Policy.Hedging.pas',
+  Murphy.Services.Randomizers in 'Murphy.Services.Randomizers.pas',
+  Murphy.Base.Chaos in 'Murphy.Base.Chaos.pas';
 
 end.
