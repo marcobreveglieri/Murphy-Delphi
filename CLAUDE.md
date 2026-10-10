@@ -27,6 +27,10 @@ msbuild Tests\Murphy.Tests.dpr
 # Interactive demo application showing all patterns
 # Compile and run Demos\00_Primer\Murphy.Demos.Primer.dpr
 msbuild Demos\00_Primer\Murphy.Demos.Primer.dpr
+
+# Chaos engineering in a DelphiMVCFramework web application (dashboard on port 8080)
+# Requires the DMVC_HOME environment variable (the DMVC folder with sources and lib)
+msbuild Demos\01_DMVC\Murphy.Demos.DMVC.dproj
 ```
 
 ### Package Installation
@@ -139,6 +143,7 @@ TRetryBuilder.Handle([E])
   - `Murphy.Resources.Strings.pas` - Localized error messages
 - `Tests/` - DUnitX test suite
 - `Demos/00_Primer/` - Interactive console demo showing all patterns
+- `Demos/01_DMVC/` - DelphiMVCFramework web server with a chaos middleware, a dependency protected by resilience policies, a `/chaos` control endpoint and a dashboard (`www/`); its `README.md` and `TESTING.md` document it. The `Chaos*U.pas` units are a kit meant to be copied into DMVC applications, so they use only APIs available since DMVC 3.4.0
 
 ## Delphi Compatibility
 

@@ -321,7 +321,7 @@ Guidelines:
 
 **Use cases**: Testing retries, timeouts, circuit breakers and fallbacks against realistic failures, game days, resilience regression tests
 
-**Demos**: the Chaos menu (`X`) of the [demo application](Demos/00_Primer) runs one scenario for each strategy: fault and latency against a retry, latency against a timeout, a simulated outage against a circuit breaker, fake responses against a fallback, and a dropped connection limited to a test user.
+**Demos**: the Chaos menu (`X`) of the [demo application](Demos/00_Primer) runs one scenario for each strategy: fault and latency against a retry, latency against a timeout, a simulated outage against a circuit breaker, fake responses against a fallback, and a dropped connection limited to a test user. The [DelphiMVCFramework demo](Demos/01_DMVC) brings chaos to a web application: a middleware injects faults and latency into the requests marked by a header, the client of a dependency injects them inside its resilience policies, and a live dashboard changes the settings at runtime and shows how the application reacts.
 
 ## Quick Start
 
@@ -339,6 +339,8 @@ Comprehensive documentation is available in the [Wiki section](https://github.co
 ## Demo Application
 
 Explore the demo in `Demos/00_Primer/Murphy.Demos.Primer.dpr` to see the patterns in action with some examples.
+
+To see chaos engineering in a web application, run `Demos/01_DMVC/Murphy.Demos.DMVC.dpr`: it requires [DelphiMVCFramework](https://github.com/danieleteti/delphimvcframework), and its [README](Demos/01_DMVC/README.md) and [testing guide](Demos/01_DMVC/TESTING.md) explain how to build it and how to try every feature.
 
 ## License
 

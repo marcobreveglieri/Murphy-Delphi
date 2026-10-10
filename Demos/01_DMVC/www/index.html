@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Murphy Chaos Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%23d03b3b'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="dashboard.css">
+  <script src="dashboard.js" defer></script>
+</head>
+<body>
+  <header class="app-header">
+    <h1>Chaos engineering with Murphy and DelphiMVCFramework</h1>
+    <p class="subtitle">
+      Two clients call the same endpoints of the same server. Only the test traffic
+      carries the <code id="marker-header">X-Chaos: on</code> header, so only its requests
+      are in the blast radius.
+    </p>
+  </header>
+
+  <main class="layout">
+    <div class="main-column">
+      <section class="toolbar" aria-label="Traffic generator">
+        <button type="button" id="traffic-toggle" class="button primary">Start traffic</button>
+        <label class="field-inline">
+          Rate
+          <select id="traffic-rate">
+            <option value="1">1 request/s per lane</option>
+            <option value="2" selected>2 requests/s per lane</option>
+            <option value="4">4 requests/s per lane</option>
+          </select>
+        </label>
+        <button type="button" id="traffic-clear" class="button">Clear</button>
+        <ul class="legend" aria-label="Legend">
+          <li><span class="swatch outcome-ok"></span><span class="icon" aria-hidden="true">✓</span>Success</li>
+          <li><span class="swatch outcome-degraded"></span><span class="icon" aria-hidden="true">◐</span>Degraded (cached rate)</li>
+          <li><span class="swatch outcome-error"></span><span class="icon" aria-hidden="true">✕</span>Error</li>
+        </ul>
+      </section>
+
+      <div id="lanes"></div>
+
+      <section class="card" aria-labelledby="log-title">
+        <h2 id="log-title">Latest requests</h2>
+        <div class="table-wrap">
+          <table class="log">
+            <thead>
+              <tr>
+                <th scope="col">Time</th>
+                <th scope="col">Lane</th>
+                <th scope="col">Request</th>
+                <th scope="col" class="num">Status</th>
+                <th scope="col" class="num">Latency</th>
+                <th scope="col">Outcome</th>
+              </tr>
+            </thead>
+            <tbody id="log-body">
+              <tr class="empty"><td colspan="6">Start the traffic to see the requests.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <aside class="side-column">
+      <section class="card" aria-labelledby="settings-title">
+        <h2 id="settings-title">Chaos settings</h2>
+        <form id="settings" class="settings" autocomplete="off">
+          <label class="switch-row">
+            <input type="checkbox" id="chaos-enabled" role="switch">
+            <span class="switch" aria-hidden="true"></span>
+            <span>
+              <strong>Chaos enabled</strong>
+              <span class="hint">MurphyChaosEnabled, the master switch</span>
+            </span>
+          </label>
+
+          <fieldset class="segmented">
+            <legend>Blast radius</legend>
+            <label><input type="radio" name="blast-radius" value="marked"><span>Marked requests</span></label>
+            <label><input type="radio" name="blast-radius" value="all"><span>All requests</span></label>
+          </fieldset>
+
+          <div id="targets"></div>
+
+          <p id="settings-status" class="settings-status" role="status"></p>
+        </form>
+      </section>
+
+      <section class="card" aria-labelledby="circuit-title">
+        <h2 id="circuit-title">Exchange rates circuit</h2>
+        <p class="circuit-state" id="circuit-state" data-state="unknown">
+          <span class="icon" aria-hidden="true">?</span>
+          <span id="circuit-label">No price requested yet</span>
+        </p>
+        <p class="hint">
+          One circuit breaker is shared by all the requests: when the test traffic opens it,
+          the normal traffic gets cached rates too. The blast radius leaks through shared state.
+        </p>
+      </section>
+    </aside>
+  </main>
+
+  <template id="lane-template">
+    <section class="card lane" aria-labelledby="">
+      <div class="lane-header">
+        <div>
+          <h2 class="lane-title"></h2>
+          <p class="hint lane-subtitle"></p>
+        </div>
+        <p class="lane-total"></p>
+      </div>
+      <dl class="tiles">
+        <div class="tile"><dt>Success</dt><dd data-stat="success">–</dd></div>
+        <div class="tile"><dt>Degraded</dt><dd data-stat="degraded">–</dd></div>
+        <div class="tile"><dt>Errors</dt><dd data-stat="errors">–</dd></div>
+        <div class="tile"><dt>p95 latency</dt><dd data-stat="p95">–</dd></div>
+      </dl>
+      <p class="hint tiles-scope">Last 40 requests · one column per request, height = latency</p>
+      <div class="chart"></div>
+    </section>
+  </template>
+
+  <template id="target-template">
+    <fieldset class="target">
+      <legend class="target-title"></legend>
+      <p class="hint target-subtitle"></p>
+      <label class="slider">
+        <span>Fault rate</span>
+        <input type="range" min="0" max="100" step="5" data-field="faultRate">
+        <output></output>
+      </label>
+      <label class="slider">
+        <span>Latency rate</span>
+        <input type="range" min="0" max="100" step="5" data-field="latencyRate">
+        <output></output>
+      </label>
+      <div class="range-row">
+        <span>Latency</span>
+        <label><span class="visually-hidden">Minimum latency</span><input type="number" min="0" step="100" data-field="latencyMinMs"></label>
+        <span aria-hidden="true">–</span>
+        <label><span class="visually-hidden">Maximum latency</span><input type="number" min="0" step="100" data-field="latencyMaxMs"></label>
+        <span>ms</span>
+      </div>
+    </fieldset>
+  </template>
+
+  <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+</body>
+</html>
