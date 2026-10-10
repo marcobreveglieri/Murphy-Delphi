@@ -42,7 +42,7 @@ uses
   Murphy.Globals,
   Murphy.Policy.Retry,
   Murphy.Policy.Wrap,
-  Murphy.Tests.Chaos.Helpers;
+  Murphy.Tests.Helpers;
 
 { TChaosBehaviorTests }
 

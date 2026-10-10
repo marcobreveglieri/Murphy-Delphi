@@ -40,6 +40,18 @@ uses
   System.SysUtils,
   Murphy.Policy.Fallback;
 
+/// <summary>
+///  Builds a policy that handles EFileNotFoundException with a constant
+///  fallback. Its closure lives in this routine frame, so the test
+///  closures can capture the policy without creating a reference cycle.
+/// </summary>
+function FileNotFoundFallback: IFallbackPolicy<string>;
+begin
+  Result := TFallbackBuilder<string>
+    .Handle([EFileNotFoundException])
+    .Fallback(function: string begin Result := 'fallback'; end);
+end;
+
 { TFallbackTests }
 
 procedure TFallbackTests.Setup;
@@ -95,10 +107,8 @@ end;
 
 procedure TFallbackTests.TestFallbackRethrowsWhenExceptionNotHandled;
 begin
-  var LPolicy := TFallbackBuilder<string>
-    .Handle([EFileNotFoundException])
-    .Fallback(function: string begin Result := 'fallback'; end);
-  
+  var LPolicy := FileNotFoundFallback;
+
   Assert.WillRaise(
     procedure
     begin

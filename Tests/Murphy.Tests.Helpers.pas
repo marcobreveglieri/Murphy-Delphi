@@ -1,4 +1,4 @@
-unit Murphy.Tests.Chaos.Helpers;
+unit Murphy.Tests.Helpers;
 
 interface
 

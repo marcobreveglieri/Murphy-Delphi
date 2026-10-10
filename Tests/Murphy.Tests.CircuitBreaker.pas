@@ -38,7 +38,8 @@ uses
   System.SysUtils,
   System.TimeSpan,
   Murphy.Globals,
-  Murphy.Policy.CircuitBreaker;
+  Murphy.Policy.CircuitBreaker,
+  Murphy.Tests.Helpers;
 
 { TCircuitBreakerTests }
 
@@ -71,19 +72,11 @@ begin
     begin
       raise EInvalidOpException.Create('Error Message');
     end;
-  Assert.WillRaise(
-    procedure
-    begin
-      LPolicy.Execute(LFailingProc);
-    end, EInvalidOpException
-  );
+  var LFailure := ExecuteCatching(LPolicy, LFailingProc);
+  Assert.AreEqual('EInvalidOpException', LFailure.ClassName);
   Assert.IsTrue(LPolicy.CircuitState = TCircuitState.Closed);
-  Assert.WillRaise(
-    procedure
-    begin
-      LPolicy.Execute(LFailingProc);
-    end, EInvalidOpException
-  );
+  LFailure := ExecuteCatching(LPolicy, LFailingProc);
+  Assert.AreEqual('EInvalidOpException', LFailure.ClassName);
   Assert.IsTrue(LPolicy.CircuitState = TCircuitState.Open);
 end;
 
@@ -158,24 +151,16 @@ begin
     begin
       raise EInvalidOpException.Create('Error Message');
     end;
-  Assert.WillRaise(
-    procedure
-    begin
-      LPolicy.Execute(LFailingProc);
-    end, EInvalidOpException
-  );
+  var LFailure := ExecuteCatching(LPolicy, LFailingProc);
+  Assert.AreEqual('EInvalidOpException', LFailure.ClassName);
   // A successful call heals the failure count...
   LPolicy.Execute(
     procedure
     begin
     end);
   // ...so the next single failure must not open the circuit.
-  Assert.WillRaise(
-    procedure
-    begin
-      LPolicy.Execute(LFailingProc);
-    end, EInvalidOpException
-  );
+  LFailure := ExecuteCatching(LPolicy, LFailingProc);
+  Assert.AreEqual('EInvalidOpException', LFailure.ClassName);
   Assert.IsTrue(LPolicy.CircuitState = TCircuitState.Closed);
 end;
 

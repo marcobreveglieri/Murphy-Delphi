@@ -36,7 +36,8 @@ uses
   System.Classes,
   System.SysUtils,
   System.TimeSpan,
-  Murphy.Policy.Timeout;
+  Murphy.Policy.Timeout,
+  Murphy.Tests.Helpers;
 
 { TTimeoutTests }
 
@@ -113,16 +114,12 @@ begin
         Assert.IsTrue(AContext.ElapsedTime > TTimeSpan.Zero);
         Assert.AreEqual(200.0, AContext.TimeoutDuration.TotalMilliseconds, 0.1);
       end);
-  Assert.WillRaise(
+  var LFailure := ExecuteCatching(LPolicy,
     procedure
     begin
-      LPolicy.Execute(
-        procedure
-        begin
-          TThread.Sleep(1000);
-        end);
-    end, ETimeoutRejectedException
-  );
+      TThread.Sleep(1000);
+    end);
+  Assert.AreEqual('ETimeoutRejectedException', LFailure.ClassName);
   Assert.IsTrue(LCallbackExecuted, 'OnTimeout callback should have been executed');
 end;
 

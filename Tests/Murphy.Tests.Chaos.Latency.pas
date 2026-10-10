@@ -47,7 +47,7 @@ uses
   Murphy.Globals,
   Murphy.Policy.Timeout,
   Murphy.Policy.Wrap,
-  Murphy.Tests.Chaos.Helpers;
+  Murphy.Tests.Helpers;
 
 { TChaosLatencyTests }
 

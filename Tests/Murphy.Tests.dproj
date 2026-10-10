@@ -164,12 +164,12 @@
         <DCCReference Include="Murphy.Tests.Chaos.Behavior.pas"/>
         <DCCReference Include="Murphy.Tests.Chaos.Common.pas"/>
         <DCCReference Include="Murphy.Tests.Chaos.Fault.pas"/>
-        <DCCReference Include="Murphy.Tests.Chaos.Helpers.pas"/>
         <DCCReference Include="Murphy.Tests.Chaos.Latency.pas"/>
         <DCCReference Include="Murphy.Tests.Chaos.Outcome.pas"/>
         <DCCReference Include="Murphy.Tests.CircuitBreaker.pas"/>
         <DCCReference Include="Murphy.Tests.Fallback.pas"/>
         <DCCReference Include="Murphy.Tests.Hedging.pas"/>
+        <DCCReference Include="Murphy.Tests.Helpers.pas"/>
         <DCCReference Include="Murphy.Tests.PolicyWrap.pas"/>
         <DCCReference Include="Murphy.Tests.RateLimit.pas"/>
         <DCCReference Include="Murphy.Tests.Retry.pas"/>

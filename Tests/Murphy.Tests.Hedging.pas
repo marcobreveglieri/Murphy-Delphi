@@ -44,7 +44,8 @@ uses
   System.SyncObjs,
   System.SysUtils,
   System.TimeSpan,
-  Murphy.Policy.Hedging;
+  Murphy.Policy.Hedging,
+  Murphy.Tests.Helpers;
 
 // Note: these tests run with real time (short sleeps) instead of the
 // mocked scheduler, because the hedging delay must be interruptible
@@ -227,17 +228,13 @@ begin
       begin
         TInterlocked.Increment(LHedgeCount);
       end);
-  Assert.WillRaise(
+  var LFailure := ExecuteCatching(LPolicy,
     procedure
     begin
-      LPolicy.Execute(
-        procedure
-        begin
-          TInterlocked.Increment(LExecutionCount);
-          raise EInvalidOpException.Create('Unhandled failure');
-        end);
-    end, EInvalidOpException
-  );
+      TInterlocked.Increment(LExecutionCount);
+      raise EInvalidOpException.Create('Unhandled failure');
+    end);
+  Assert.AreEqual('EInvalidOpException', LFailure.ClassName);
   Assert.AreEqual(1, LExecutionCount);
   Assert.AreEqual(0, LHedgeCount);
 end;

@@ -53,7 +53,7 @@ uses
   Murphy.Policy.Retry,
   Murphy.Policy.Wrap,
   Murphy.Resources.Strings,
-  Murphy.Tests.Chaos.Helpers;
+  Murphy.Tests.Helpers;
 
 { TChaosFaultTests }
 

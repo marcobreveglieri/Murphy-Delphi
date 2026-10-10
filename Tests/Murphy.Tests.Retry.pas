@@ -31,7 +31,8 @@ implementation
 uses
   System.SysUtils,
   Murphy.Globals,
-  Murphy.Policy.Retry;
+  Murphy.Policy.Retry,
+  Murphy.Tests.Helpers;
 
 { TRetryTests }
 
@@ -72,18 +73,14 @@ begin
         Result := EFileNotFoundException(C.Exception).ErrorCode <> ErrorCode;
       end
     );
-  Assert.WillRaise(
+  var LFailure := ExecuteCatching(LPolicy,
     procedure
     begin
-      LPolicy.Execute(
-        procedure
-        begin
-          var E := EFileNotFoundException.Create('Error Message');
-          E.ErrorCode := 123;
-          raise E;
-        end);
-    end, EFileNotFoundException
-  );
+      var E := EFileNotFoundException.Create('Error Message');
+      E.ErrorCode := 123;
+      raise E;
+    end);
+  Assert.AreEqual('EFileNotFoundException', LFailure.ClassName);
 end;
 
 procedure TRetryTests.TestRetryHandleWhenConditionSkipsException;
@@ -96,21 +93,17 @@ begin
         Result := EFileNotFoundException(C.Exception).ErrorCode = LErrorCode;
       end
     );
-  Assert.WillNotRaise(
+  var LFailure := ExecuteCatching(LPolicy,
     procedure
     begin
-      LPolicy.Execute(
-        procedure
-        begin
-          if LErrorCode > 0 then
-            Exit;
-          Inc(LErrorCode);
-          var E := EFileNotFoundException.Create('Error Message');
-          E.ErrorCode := LErrorCode;
-          raise E;
-        end);
-    end, EFileNotFoundException
-  );
+      if LErrorCode > 0 then
+        Exit;
+      Inc(LErrorCode);
+      var E := EFileNotFoundException.Create('Error Message');
+      E.ErrorCode := LErrorCode;
+      raise E;
+    end);
+  Assert.IsFalse(LFailure.Raised);
 end;
 
 initialization
