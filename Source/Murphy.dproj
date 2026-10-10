@@ -142,6 +142,7 @@
         <DCCReference Include="Murphy.Policy.Hedging.pas"/>
         <DCCReference Include="Murphy.Services.Randomizers.pas"/>
         <DCCReference Include="Murphy.Base.Chaos.pas"/>
+        <DCCReference Include="Murphy.Chaos.Fault.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
