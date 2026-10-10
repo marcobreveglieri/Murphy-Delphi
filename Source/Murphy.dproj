@@ -144,6 +144,7 @@
         <DCCReference Include="Murphy.Base.Chaos.pas"/>
         <DCCReference Include="Murphy.Chaos.Fault.pas"/>
         <DCCReference Include="Murphy.Chaos.Latency.pas"/>
+        <DCCReference Include="Murphy.Chaos.Behavior.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

@@ -15,6 +15,7 @@ uses
   DUnitX.TestFramework,
   Murphy.Tests.Bulkhead in 'Murphy.Tests.Bulkhead.pas',
   Murphy.Tests.Cache in 'Murphy.Tests.Cache.pas',
+  Murphy.Tests.Chaos.Behavior in 'Murphy.Tests.Chaos.Behavior.pas',
   Murphy.Tests.Chaos.Common in 'Murphy.Tests.Chaos.Common.pas',
   Murphy.Tests.Chaos.Fault in 'Murphy.Tests.Chaos.Fault.pas',
   Murphy.Tests.Chaos.Helpers in 'Murphy.Tests.Chaos.Helpers.pas',

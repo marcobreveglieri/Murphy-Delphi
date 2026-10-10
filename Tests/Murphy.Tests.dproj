@@ -161,6 +161,7 @@
         </DelphiCompile>
         <DCCReference Include="Murphy.Tests.Bulkhead.pas"/>
         <DCCReference Include="Murphy.Tests.Cache.pas"/>
+        <DCCReference Include="Murphy.Tests.Chaos.Behavior.pas"/>
         <DCCReference Include="Murphy.Tests.Chaos.Common.pas"/>
         <DCCReference Include="Murphy.Tests.Chaos.Fault.pas"/>
         <DCCReference Include="Murphy.Tests.Chaos.Helpers.pas"/>
