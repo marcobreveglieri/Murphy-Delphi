@@ -1,5 +1,9 @@
 <div>
-  <img alt="Murphy Library for Delphi" width="100%" src="./Assets/logo-murphy.png">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./Assets/logo-murphy-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="./Assets/logo-murphy-light.png">
+    <img alt="Murphy Library for Delphi" width="100%" src="./Assets/logo-murphy-light.png">
+  </picture>
 </div>
 <br />
 
