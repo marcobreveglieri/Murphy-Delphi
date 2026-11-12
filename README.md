@@ -194,6 +194,24 @@ begin
 end;
 ```
 
+Note that the timeout does not stop the operation: it runs in a separate task, the caller stops waiting for it when the time is over and gets `ETimeoutRejectedException`, but Delphi cannot kill a running task, so the operation is *abandoned* and goes on in the background, occupying a thread of the thread pool until it ends. With slow operations (HTTP calls, database connections) and many timeouts in a row, abandoned operations can pile up and exhaust the pool; an abandoned operation must also not touch anything owned by the caller (UI, shared state).
+
+For a cooperative timeout, pass a procedure that takes an `ICancellationToken`: it is cancelled when the timeout expires, and the operation decides how to react, by polling the token, by calling `ThrowIfCancellationRequested` at its safe points, or by registering a callback that interrupts a blocking call.
+
+```pascal
+Policy.Execute(procedure(AToken: ICancellationToken)
+               begin
+                 AToken.Register(procedure begin Client.Disconnect; end);
+                 while HasMoreWork do
+                 begin
+                   AToken.ThrowIfCancellationRequested; // Leaves when the time is over
+                   ProcessNextItem;
+                 end;
+               end);
+```
+
+The caller always gets the timeout exception at once; the exceptions raised by the operation after the timeout, `EOperationCancelled` included, are discarded.
+
 **Use cases**: Slow network calls, unresponsive services, enforcing SLAs
 
 ### Bulkhead Pattern

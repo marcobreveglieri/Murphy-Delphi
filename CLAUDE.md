@@ -165,6 +165,7 @@ TRetryBuilder.Handle([E])
 - Rate Limit uses GUID tokens to track available call slots
 - Retry pattern allows runtime modification of wait delay via `TRetryContext.WaitDelay`
 - Retry `OnRetry` runs only when a new attempt is certain (after the `When` and retry-count checks, before the wait), while `TRetryContext.Exception` is still valid: the context drops it afterwards because the exception object dies with the handler. An exception raised by the callback is not handled and ends the execution
+- Timeout runs the operation in a `TTask` and abandons it when the time is over (a task cannot be stopped): it goes on in the background on a pool thread. `Execute(TProc<ICancellationToken>)` passes it a token cancelled right after the task state becomes "abandoned" and before `OnTimeout`; callbacks registered on the token run once, in the waiting thread, and their exceptions are swallowed. The exception an abandoned operation raises (also `EOperationCancelled`) is destroyed by the task itself
 - Chaos Fault frees the generated exception when `OnFaultInjected` raises, since the fault is then never raised
 
 ## Testing Notes
