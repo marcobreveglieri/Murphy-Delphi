@@ -10,6 +10,7 @@ resourcestring
   StrErrChaosInvalidInjectionRate = 'Chaos injection rate must be between 0 and 1';
   StrErrCircuitBroken = 'Circuit is open or isolated and is not allowing calls';
   StrErrHedgingInvalidAttempts = 'Hedging attempts count must be zero or greater';
+  StrErrPolicyWrapNilPolicy = 'Policy wrap cannot contain a nil policy';
   StrErrPolicyWrapNoPolicies = 'Policy wrap requires at least one policy';
   StrErrRateLimitExceeded = 'Rate limit exceeded: retry later';
   StrErrTimeoutExceeded = 'Operation exceeded the timeout duration';

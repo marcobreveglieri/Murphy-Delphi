@@ -30,6 +30,19 @@ type
     procedure Execute(AProc: TProc);
   end;
 
+{ IFunctionPolicy<TResult> }
+
+  /// <summary>
+  ///  Represents the contract for policies that can execute a function
+  ///  returning a value (such as Fallback, Cache and Chaos Outcome).
+  ///  Policies implementing this interface can participate in a generic
+  ///  policy wrap, see TPolicyWrapBuilder&lt;TResult&gt;.
+  /// </summary>
+  IFunctionPolicy<TResult> = interface(IPolicy)
+    ['{3C1B8E5A-7D42-4F6B-9A0E-5D2C8F1B6E73}']
+    function Execute(AFunc: TFunc<TResult>): TResult;
+  end;
+
 { TPolicy }
 
   /// <summary>

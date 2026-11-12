@@ -20,9 +20,8 @@ type
   ///  exists (even an expired one), that stale value is returned as the
   ///  last known good result.
   /// </summary>
-  ICachePolicy<TResult> = interface(IPolicy)
+  ICachePolicy<TResult> = interface(IFunctionPolicy<TResult>)
     ['{4988F6C2-CB95-466E-8F6B-2BCFE8776014}']
-    function Execute(AFunc: TFunc<TResult>): TResult;
     function Expire(ADuration: TTimeSpan): ICachePolicy<TResult>;
     procedure Invalidate;
   end;

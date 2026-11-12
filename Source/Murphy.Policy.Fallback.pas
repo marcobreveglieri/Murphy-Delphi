@@ -13,9 +13,8 @@ type
   /// <summary>
   ///  Represents the interface of the "Fallback" policy pattern.
   /// </summary>
-  IFallbackPolicy<TResult> = interface (IPolicy)
+  IFallbackPolicy<TResult> = interface (IFunctionPolicy<TResult>)
     ['{FAF09E9F-03E5-4E80-B1D2-09DDFB0492A3}']
-    function Execute(AFunc: TFunc<TResult>): TResult;
     function Fallback(AFunc: TFunc<TResult>): IFallbackPolicy<TResult>;
   end;
 

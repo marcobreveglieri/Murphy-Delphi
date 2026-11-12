@@ -284,6 +284,28 @@ begin
 end;
 ```
 
+Policies that return a value (Fallback, Cache, Chaos Outcome) can be wrapped too, with the generic `TPolicyWrapBuilder<TResult>`, which accepts both kinds of policy in the same array and returns a policy that executes a function.
+
+```pascal
+uses Murphy.Policy.Fallback, Murphy.Policy.Retry, Murphy.Policy.Wrap;
+
+var
+  Policy: IPolicyWrap<string>;
+  Value: string;
+begin
+  Policy := TPolicyWrapBuilder<string>.Wrap([
+    TFallbackBuilder<string>
+      .Handle(EDatabaseError)
+      .Fallback(function: string begin Result := GetCachedData; end),
+    TRetryBuilder
+      .Handle(EDatabaseError)
+      .Retry(3)                          // Retry first, then fall back
+  ]);
+
+  Value := Policy.Execute(function: string begin Result := ReadFromDatabase; end);
+end;
+```
+
 **Use cases**: Sophisticated resilience strategies, combining retry/timeout/circuit breaker
 
 ## Chaos Engineering
@@ -330,7 +352,7 @@ Guidelines:
 
 - **Place chaos policies last** (innermost) in a policy wrap, so the resilience policies around them react to the injected failures
 - **Control the blast radius**: set the `MurphyChaosEnabled` flag (`Murphy.Globals`) to `False` to turn off every chaos policy at once, e.g. in production builds, and use `EnabledGenerator` to limit chaos to selected users or environments
-- **Use Fault for exceptions** and Outcome for fake results; being generic on the result type like Fallback and Cache, Outcome does not join a policy wrap: call it inside the function executed by the other policies
+- **Use Fault for exceptions** and Outcome for fake results; being generic on the result type like Fallback and Cache, Outcome joins only a generic wrap, `TPolicyWrapBuilder<TResult>`, where it goes last as well
 - Latency waits through the scheduler service, so test mode (`MurphyTestModeEnabled`) skips the delay
 
 **Use cases**: Testing retries, timeouts, circuit breakers and fallbacks against realistic failures, game days, resilience regression tests

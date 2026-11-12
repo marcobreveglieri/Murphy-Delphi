@@ -81,7 +81,7 @@ All policies follow a consistent builder pattern with three layers:
 **4. Fallback Pattern** (`Murphy.Policy.Fallback.pas`)
 - Returns alternate value when operation fails
 - Generic implementation: `IFallbackPolicy<TResult>` and `TFallbackPolicy<TResult>`
-- Only policy that uses `TFunc<TResult>` instead of `TProc`
+- Function policy: executes a `TFunc<TResult>` instead of a `TProc`, as `ICachePolicy<TResult>` and `IChaosOutcomePolicy<TResult>` do; all of them derive from `IFunctionPolicy<TResult>` (`Murphy.Base.Policy.pas`), which is what a generic wrap accepts
 - Usage: `TFallbackBuilder<String>.Handle([E]).Fallback(fallbackFunc).Execute(func)`
 
 ### Chaos Strategies
@@ -92,10 +92,16 @@ Modeled on Polly's chaos engineering (https://www.pollydocs.org/chaos/), they in
 - **Fault** (`Murphy.Chaos.Fault.pas`): raises an exception instead of the action (`EChaosFaultException` by default)
 - **Latency** (`Murphy.Chaos.Latency.pas`): waits via `Scheduler.WaitFor` (skipped in test mode), then runs the action
 - **Behavior** (`Murphy.Chaos.Behavior.pas`): runs custom code before the action
-- **Outcome** (`Murphy.Chaos.Outcome.pas`): generic `TFunc<TResult>` policy returning a fake result; like Fallback/Cache it cannot join a `TPolicyWrap`
+- **Outcome** (`Murphy.Chaos.Outcome.pas`): generic `TFunc<TResult>` policy returning a fake result; like Fallback/Cache it is a function policy, so it joins only a `TPolicyWrapBuilder<TResult>` wrap
 - Builders are sealed and do not derive from `TPolicyBuilder` (chaos does not filter exceptions): the entry point is `InjectionRate(Rate)` or `InjectionRateGenerator(Func)`
 - Every interface redeclares the common fluent options (Delphi has no covariant returns); generator variants use distinct names (`...Generator`) instead of overloads, so a function is never evaluated once at configuration time by mistake
 - Chaos policies go last (innermost) in a `TPolicyWrap`
+
+### Policy Wrap
+
+- `TPolicyWrapBuilder.Wrap([A, B])` (`Murphy.Policy.Wrap.pas`) combines `IExecutablePolicy` ones, outermost-first
+- `TPolicyWrapBuilder<TResult>.Wrap([A, B])` also takes function policies (Fallback, Cache, Chaos Outcome) and returns `IPolicyWrap<TResult>`, which executes a `TFunc<TResult>`. Elements are `TPolicyWrapItem<TResult>` records converted implicitly from either kind of policy, so no adapter is needed
+- An executable policy in a generic wrap carries the value out through a variable local to each call: a timed-out attempt that goes on in the background cannot overwrite the result of a later one
 
 ### Service Abstraction Layer
 

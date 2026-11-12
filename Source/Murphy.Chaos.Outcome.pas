@@ -26,13 +26,13 @@ type
   /// <summary>
   ///  Represents the interface of the "Chaos Outcome" policy, that
   ///  returns a fake result instead of executing the function. Like the
-  ///  Fallback and Cache policies it works on functions, so it cannot
-  ///  join a policy wrap: call it inside the function executed by the
-  ///  other policies. To inject exceptions use the "Chaos Fault" policy.
+  ///  Fallback and Cache policies it works on functions, so it can join
+  ///  only a generic policy wrap, TPolicyWrapBuilder&lt;TResult&gt;, as
+  ///  the innermost policy. To inject exceptions use the "Chaos Fault"
+  ///  policy.
   /// </summary>
-  IChaosOutcomePolicy<TResult> = interface(IPolicy)
+  IChaosOutcomePolicy<TResult> = interface(IFunctionPolicy<TResult>)
     ['{5BA95FD0-7059-45A9-8FF2-EB98001F07D0}']
-    function Execute(AFunc: TFunc<TResult>): TResult;
     function Enabled(AValue: Boolean): IChaosOutcomePolicy<TResult>;
     function EnabledGenerator(AGenerator: TFunc<Boolean>): IChaosOutcomePolicy<TResult>;
     function InjectionRate(ARate: Double): IChaosOutcomePolicy<TResult>;
