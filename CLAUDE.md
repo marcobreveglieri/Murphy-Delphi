@@ -158,6 +158,7 @@ TRetryBuilder.Handle([E])
 - Circuit Breaker stores last exception in `FBrokenFor` field for inner exception pattern
 - Rate Limit uses GUID tokens to track available call slots
 - Retry pattern allows runtime modification of wait delay via `TRetryContext.WaitDelay`
+- Retry `OnRetry` runs only when a new attempt is certain (after the `When` and retry-count checks, before the wait), while `TRetryContext.Exception` is still valid: the context drops it afterwards because the exception object dies with the handler. An exception raised by the callback is not handled and ends the execution
 - Chaos Fault frees the generated exception when `OnFaultInjected` raises, since the fault is then never raised
 
 ## Testing Notes

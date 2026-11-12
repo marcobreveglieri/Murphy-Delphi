@@ -36,6 +36,17 @@ type
     function Retry(ATimes: Integer = 1): IRetryPolicy;
     function RetryForever: IRetryPolicy;
     function RetryOnce: IRetryPolicy;
+    /// <summary>
+    ///  Sets a callback invoked before each new attempt, that is only
+    ///  when a retry is actually going to happen (never after the last
+    ///  failure, nor for exceptions that are not handled or rejected by
+    ///  "When"). The context carries the number of attempts made so far
+    ///  and the exception that caused the retry: the latter is valid
+    ///  only inside the callback. The wait delay can still be changed
+    ///  here. An exception raised by the callback is not handled by the
+    ///  policy and ends the execution.
+    /// </summary>
+    function OnRetry(ACallback: TProc<TRetryContext>): IRetryPolicy;
     function Wait(ADelay: TTimeSpan): IRetryPolicy;
     function When(APredicate: TPredicate<TRetryContext>): IRetryPolicy;
   end;
@@ -47,12 +58,14 @@ type
   /// </summary>
   TRetryPolicy = class(TPolicy, IRetryPolicy)
   private
+    FOnRetryCallback: TProc<TRetryContext>;
     FRetryTimes: Integer;
     FWaitDelay: TTimeSpan;
     FWhenPredicate: TPredicate<TRetryContext>;
   public
     constructor Create(AExceptionTypes: TArray<ExceptClass>); override;
     procedure Execute(AProc: TProc);
+    function OnRetry(ACallback: TProc<TRetryContext>): IRetryPolicy;
     function Retry(ATimes: Integer = 1): IRetryPolicy;
     function RetryForever: IRetryPolicy;
     function RetryOnce: IRetryPolicy;
@@ -106,6 +119,10 @@ begin
             raise;
           if (FRetryTimes >= 0) and (LContext.Attempts > FRetryTimes) then
             raise;
+          // A new attempt is certain from here on: the context still holds
+          // the exception, which is only valid until this handler exits.
+          if Assigned(FOnRetryCallback) then
+            FOnRetryCallback(LContext);
           // The exception object is destroyed when this handler exits,
           // so the context must not keep a reference across attempts.
           LContext.FException := nil;
@@ -116,6 +133,12 @@ begin
   finally
     LContext.Free;
   end;
+end;
+
+function TRetryPolicy.OnRetry(ACallback: TProc<TRetryContext>): IRetryPolicy;
+begin
+  FOnRetryCallback := ACallback;
+  Result := Self;
 end;
 
 function TRetryPolicy.Retry(ATimes: Integer): IRetryPolicy;

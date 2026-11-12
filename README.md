@@ -87,6 +87,20 @@ begin
 end;
 ```
 
+`OnRetry` registers a callback invoked before each new attempt, i.e. only when a retry is really going to happen (never after the last failure). It is the place to count retries or to repair the dependency, for instance by reconnecting. Inside the callback `Attempts` is the number of attempts made so far, `Exception` is the failure that caused the retry (valid only there) and `WaitDelay` can still be changed.
+
+```pascal
+Policy := TRetryBuilder
+  .Handle(EDatabaseError)
+  .Retry(3)
+  .Wait(TTimeSpan.FromSeconds(1))
+  .OnRetry(procedure(AContext: TRetryContext)
+           begin
+             Log('Retry after attempt ' + AContext.Attempts.ToString);
+             Database.Reconnect;
+           end);
+```
+
 **Use cases**: Network requests, database connections, temporary service unavailability
 
 ### Circuit Breaker Pattern

@@ -24,11 +24,25 @@ type
     procedure TestRetryHandleWhenConditionThrowsException;
     [Test]
     procedure TestRetryHandleWhenConditionSkipsException;
+    [Test]
+    procedure TestOnRetryIsCalledBeforeEachRetry;
+    [Test]
+    procedure TestOnRetryIsNotCalledWhenFirstAttemptSucceeds;
+    [Test]
+    procedure TestOnRetryIsNotCalledForUnhandledException;
+    [Test]
+    procedure TestOnRetryIsNotCalledWhenConditionRejects;
+    [Test]
+    procedure TestOnRetryCanChangeWaitDelay;
+    [Test]
+    procedure TestOnRetryExceptionIsPropagated;
   end;
 
 implementation
 
 uses
+  System.Diagnostics,
+  System.TimeSpan,
   System.SysUtils,
   Murphy.Globals,
   Murphy.Policy.Retry,
@@ -104,6 +118,142 @@ begin
       raise E;
     end);
   Assert.IsFalse(LFailure.Raised);
+end;
+
+procedure TRetryTests.TestOnRetryIsCalledBeforeEachRetry;
+begin
+  var LAttemptsSeen := '';
+  var LExceptionSeen := '';
+  var LExecutions := 0;
+  var LPolicy := TRetryBuilder.Handle(EInvalidOpException)
+    .Retry(3)
+    .OnRetry(
+      procedure(AContext: TRetryContext)
+      begin
+        LAttemptsSeen := LAttemptsSeen + AContext.Attempts.ToString + ',';
+        LExceptionSeen := AContext.Exception.ClassName;
+      end);
+  var LFailure := ExecuteCatching(LPolicy,
+    procedure
+    begin
+      Inc(LExecutions);
+      raise EInvalidOpException.Create('Test failure');
+    end);
+  // The last failure is not followed by another attempt: no callback.
+  Assert.AreEqual(4, LExecutions);
+  Assert.AreEqual('1,2,3,', LAttemptsSeen);
+  Assert.AreEqual('EInvalidOpException', LExceptionSeen);
+  Assert.AreEqual('EInvalidOpException', LFailure.ClassName);
+end;
+
+procedure TRetryTests.TestOnRetryIsNotCalledWhenFirstAttemptSucceeds;
+begin
+  var LCallbacks := 0;
+  var LPolicy := TRetryBuilder.Handle(EInvalidOpException)
+    .Retry(3)
+    .OnRetry(
+      procedure(AContext: TRetryContext)
+      begin
+        Inc(LCallbacks);
+      end);
+  var LFailure := ExecuteCatching(LPolicy,
+    procedure
+    begin
+      // Succeeds at once.
+    end);
+  Assert.IsFalse(LFailure.Raised);
+  Assert.AreEqual(0, LCallbacks);
+end;
+
+procedure TRetryTests.TestOnRetryIsNotCalledForUnhandledException;
+begin
+  var LCallbacks := 0;
+  var LPolicy := TRetryBuilder.Handle(EFileNotFoundException)
+    .Retry(3)
+    .OnRetry(
+      procedure(AContext: TRetryContext)
+      begin
+        Inc(LCallbacks);
+      end);
+  var LFailure := ExecuteCatching(LPolicy,
+    procedure
+    begin
+      raise EInvalidOpException.Create('Not handled');
+    end);
+  Assert.AreEqual('EInvalidOpException', LFailure.ClassName);
+  Assert.AreEqual(0, LCallbacks);
+end;
+
+procedure TRetryTests.TestOnRetryIsNotCalledWhenConditionRejects;
+begin
+  var LCallbacks := 0;
+  var LPolicy := TRetryBuilder.Handle(EInvalidOpException)
+    .Retry(3)
+    .When(
+      function(AContext: TRetryContext): Boolean
+      begin
+        Result := False;
+      end)
+    .OnRetry(
+      procedure(AContext: TRetryContext)
+      begin
+        Inc(LCallbacks);
+      end);
+  var LFailure := ExecuteCatching(LPolicy,
+    procedure
+    begin
+      raise EInvalidOpException.Create('Rejected by the condition');
+    end);
+  Assert.AreEqual('EInvalidOpException', LFailure.ClassName);
+  Assert.AreEqual(0, LCallbacks);
+end;
+
+procedure TRetryTests.TestOnRetryCanChangeWaitDelay;
+begin
+  // Needs the real scheduler, because the test one never waits.
+  MurphyTestModeEnabled := False;
+  var LExecutions := 0;
+  var LPolicy := TRetryBuilder.Handle(EInvalidOpException)
+    .Retry(1)
+    .Wait(TTimeSpan.FromSeconds(5))
+    .OnRetry(
+      procedure(AContext: TRetryContext)
+      begin
+        AContext.WaitDelay := TTimeSpan.FromMilliseconds(10);
+      end);
+  var LStopwatch := TStopwatch.StartNew;
+  var LFailure := ExecuteCatching(LPolicy,
+    procedure
+    begin
+      Inc(LExecutions);
+      if LExecutions = 1 then
+        raise EInvalidOpException.Create('First attempt fails');
+    end);
+  Assert.IsFalse(LFailure.Raised);
+  Assert.AreEqual(2, LExecutions);
+  Assert.IsTrue(LStopwatch.ElapsedMilliseconds < 2000,
+    'The wait delay set by the callback should replace the configured one');
+end;
+
+procedure TRetryTests.TestOnRetryExceptionIsPropagated;
+begin
+  var LExecutions := 0;
+  var LPolicy := TRetryBuilder.Handle(EFileNotFoundException)
+    .Retry(3)
+    .OnRetry(
+      procedure(AContext: TRetryContext)
+      begin
+        raise EInvalidOpException.Create('Callback failure');
+      end);
+  var LFailure := ExecuteCatching(LPolicy,
+    procedure
+    begin
+      Inc(LExecutions);
+      raise EFileNotFoundException.Create('Operation failure');
+    end);
+  Assert.AreEqual('EInvalidOpException', LFailure.ClassName);
+  Assert.AreEqual('Callback failure', LFailure.Message);
+  Assert.AreEqual(1, LExecutions, 'The retry must not go on after a callback failure');
 end;
 
 initialization
